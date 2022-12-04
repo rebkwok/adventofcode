@@ -108,7 +108,5 @@ def main(input_filename):
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("inputfile")
-    # parser.add_argument("-m1", "--max-1", dest="calculate_max", action="store_true")
-    # parser.add_argument("-m3", "--max-3", dest="calculate_max_top_3", action="store_true")
     args = parser.parse_args()   
     main(args.inputfile)
