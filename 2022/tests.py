@@ -9,6 +9,7 @@ from day3 import (
     identify_common_item, total_badge_priorities
 )
 import day4
+import day5
 
 
 # day 1
@@ -205,3 +206,127 @@ def test_total_overlap():
         ([2, 3, 4, 5, 6], [4, 5, 6, 7, 8]),
     ]
     assert day4.total_overlap(converted_input) == 4
+
+
+def test_read_starting_stacks_and_instructions():
+    stacks, stack_count, instructions = day5.get_starting_stacks_and_instructions("day5_test.txt")
+    assert stacks == [
+        "    [D]    ",
+        "[N] [C]    ",
+        "[Z] [M] [P]"
+    ]
+    assert stack_count == 3
+    assert instructions == [
+        "move 1 from 2 to 1",
+        "move 3 from 1 to 3",
+        "move 2 from 2 to 1",
+        "move 1 from 1 to 2",
+    ]
+
+    stacks, stack_count, _ = day5.get_starting_stacks_and_instructions("day5.txt")
+    assert stack_count == 9
+    assert stacks == [
+        "                        [R] [J] [W]",
+        "            [R] [N]     [T] [T] [C]",
+        "[R]         [P] [G]     [J] [P] [T]",
+        "[Q]     [C] [M] [V]     [F] [F] [H]",
+        "[G] [P] [M] [S] [Z]     [Z] [C] [Q]",
+        "[P] [C] [P] [Q] [J] [J] [P] [H] [Z]",
+        "[C] [T] [H] [T] [H] [P] [G] [L] [V]",
+        "[F] [W] [B] [L] [P] [D] [L] [N] [G]",
+    ]
+
+
+def test_parse_stacks():
+    input = [
+        "    [D]    ",
+        "[N] [C]    ",
+        "[Z] [M] [P]"
+    ]
+    # parsed stacks are bottom-to-top and L-to-R
+    assert day5.parse_stacks(input, 3) == [
+        ["Z", "N"], ["M", "C", "D"], ["P"]
+    ]
+
+
+def test_parse_instructions():
+    instructions = [
+        "move 1 from 2 to 1",
+        "move 3 from 1 to 3",
+        "move 2 from 2 to 1",
+        "move 1 from 1 to 2",
+    ]
+    assert list(day5.parse_instructions(instructions)) == [
+        (1, 1, 0),
+        (3, 0, 2),
+        (2, 1, 0),
+        (1, 0, 1)
+    ]
+
+
+def test_do_instructions_part1():
+    parsed_stacks = [
+        ["Z", "N"], ["M", "C", "D"], ["P"]
+    ]
+    instruction = [(1, 1, 0)]
+    new_parsed_stacks = day5.do_instructions_part1(parsed_stacks, instruction)
+    assert new_parsed_stacks == [["Z", "N", "D"], ["M", "C"], ["P"]] 
+
+    instruction = [(3, 0, 2)]
+    new_parsed_stacks = day5.do_instructions_part1(new_parsed_stacks, instruction)
+    assert new_parsed_stacks == [[], ["M", "C"], ["P", "D", "N", "Z"]] 
+
+
+def test_do_all_instructions_part1d():
+    parsed_stacks = [["Z", "N"], ["M", "C", "D"], ["P"]]
+    instructions = [
+        (1, 1, 0),
+        (3, 0, 2),
+        (2, 1, 0),
+        (1, 0, 1)
+    ]
+    assert day5.do_instructions_part1(parsed_stacks, instructions) == [
+        ["C"], ["M"], ["P", "D", "N", "Z"]
+    ]
+
+
+def test_do_instructions_part2():
+    parsed_stacks = [
+        ["Z", "N"], ["M", "C", "D"], ["P"]
+    ]
+    instruction = [(1, 1, 0)]
+    new_parsed_stacks = day5.do_instructions_part2(parsed_stacks, instruction)
+    assert new_parsed_stacks == [["Z", "N", "D"], ["M", "C"], ["P"]] 
+
+    instruction = [(3, 0, 2)]
+    new_parsed_stacks = day5.do_instructions_part2(new_parsed_stacks, instruction)
+    assert new_parsed_stacks == [[], ["M", "C"], ["P", "Z", "N", "D"]] 
+
+
+def test_do_all_instructions_part2():
+    parsed_stacks = [["Z", "N"], ["M", "C", "D"], ["P"]]
+    instructions = [
+        (1, 1, 0),
+        (3, 0, 2),
+        (2, 1, 0),
+        (1, 0, 1)
+    ]
+    assert day5.do_instructions_part2(parsed_stacks, instructions) == [
+        ["M"], ["C"], ["P", "Z", "N", "D"]
+    ]
+
+
+@pytest.mark.parametrize(
+    "stacks,expected",
+    [
+        ([["C", "B"], ["C"], ["A", "B", "N"]], "BCN"),
+        ([["C", "B"], [], ["A", "B", "N"], []], "BN")
+    ]
+)
+def test_top_crates(stacks, expected):
+    assert day5.top_crates(stacks) == expected
+
+
+def test_day5():
+    assert day5.main("day5_test.txt", part=1) == "CMZ"
+    assert day5.main("day5_test.txt", part=2) == "MCD"
