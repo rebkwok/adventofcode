@@ -10,6 +10,8 @@ from day3 import (
 )
 import day4
 import day5
+import day6
+import day7
 
 
 # day 1
@@ -330,3 +332,183 @@ def test_top_crates(stacks, expected):
 def test_day5():
     assert day5.main("day5_test.txt", part=1) == "CMZ"
     assert day5.main("day5_test.txt", part=2) == "MCD"
+
+
+# day6
+@pytest.mark.parametrize(
+    "datastream,first_marker",
+    [
+        ("mjqjpqmgbljsphdztnvjfqwrcgsmlb", 7),
+        ("bvwbjplbgvbhsrlpgdmjqwftvncz", 5),
+        ("nppdvjthqldpwncqszvftbrmjlhg", 6),
+        ("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg", 10),
+        ("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw", 11)
+    ]
+)
+def test_first_marker_start_of_packet(datastream, first_marker):
+    assert day6.first_marker(datastream, 4) == first_marker
+
+
+@pytest.mark.parametrize(
+    "datastream,first_marker",
+    [
+        ("mjqjpqmgbljsphdztnvjfqwrcgsmlb", 19),
+        ("bvwbjplbgvbhsrlpgdmjqwftvncz", 23),
+        ("nppdvjthqldpwncqszvftbrmjlhg", 23),
+        ("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg", 29),
+        ("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw", 26)
+    ]
+)
+def test_first_marker_start_of_message(datastream, first_marker):
+    assert day6.first_marker(datastream, 14) == first_marker
+
+
+# day7
+def test_build_tree():
+    test_input = day7.terminal_lines("day7_test.txt")
+
+    # File structure:
+    #   - / (dir)
+    #   - a (dir)
+    #     - e (dir)
+    #       - i (file, size=584)
+    #     - f (file, size=29116)
+    #     - g (file, size=2557)
+    #     - h.lst (file, size=62596)
+    #   - b.txt (file, size=14848514)
+    #   - c.dat (file, size=8504156)
+    #   - d (dir)
+    #     - j (file, size=4060174)
+    #     - d.log (file, size=8033020)
+    #     - d.ext (file, size=5626152)
+    #     - k (file, size=7214296)
+
+    tree = day7.Tree(test_input)
+    # direct parents
+    assert tree.parent_map == {
+        "/": None,
+        "a": "/",
+        "b.txt": "/",
+        "c.dat": "/",
+        "d": "/",
+        "e": "a",
+        "f": "a",
+        "g": "a",
+        "h.lst": "a",
+        "i": "e",
+        "j": "d",
+        "d.log": "d",
+        "d.ext": "d",
+        "k": "d"
+    }
+
+    # all parents
+    assert tree.ancestors == {
+        "/": set(),
+        "a": {"/"},
+        "b.txt": {"/"},
+        "c.dat": {"/"},
+        "d": {"/"},
+        "e": {"/", "a"},
+        "f": {"/", "a"},
+        "g": {"/", "a"},
+        "h.lst": {"/", "a"},
+        "i": {"/", "a", "e"},
+        "j": {"/", "d"},
+        "d.log": {"/", "d"},
+        "d.ext": {"/", "d"},
+        "k": {"/", "d"},
+    }
+    
+
+def test_dir_sizes():
+    test_input = day7.terminal_lines("day7_test.txt")
+
+    # File structure:
+    #   - / (dir)
+    #   - a (dir)
+    #     - e (dir)
+    #       - i (file, size=584)
+    #     - f (file, size=29116)
+    #     - g (file, size=2557)
+    #     - h.lst (file, size=62596)
+    #   - b.txt (file, size=14848514)
+    #   - c.dat (file, size=8504156)
+    #   - d (dir)
+    #     - j (file, size=4060174)
+    #     - d.log (file, size=8033020)
+    #     - d.ext (file, size=5626152)
+    #     - k (file, size=7214296)
+
+    tree = day7.Tree(test_input)
+    assert tree.dir_sizes() == {
+        "/": 48381165,
+        "d": 24933642,
+        "a": 94853,
+        "e": 584, 
+    }
+
+
+def test_total_directory_sizes_under_100000():
+    test_input = day7.terminal_lines("day7_test.txt")
+    tree = day7.Tree(test_input)
+    assert day7.total_size_lte(tree, 100000) == 95437 
+
+
+# day7
+def test_build_tree_with_dupes():
+    # we add dir parents when we cd into a dir
+    # we add file parents on ls
+    # first cd on / ignored
+    test_input = [
+        "$ cd /",
+        "$ ls", 
+        "dir a",
+        "dir d",
+        "3 j.txt",  # --> add j.txt, parent /
+        "$ cd a",  # --> add a, parent /
+        "$ ls",
+        "dir d",
+        "$ cd d",  # --> add d, parent a
+        "$ ls",
+        "1 j.txt",  # --> add j.txt_1, parent d
+        "$ cd ..",
+        "$ cd ..",
+        "$ cd d",  # --> add d_1, parent /
+        "$ ls",
+        "2 j.txt"  # --> add j.txt_2, parent d_1
+    ]
+
+    # File structure:
+    #   - / (dir)
+    #   - a (dir)
+    #     - d (dir)
+    #       - j.txt (file, size=1)
+    #   - d (dir)
+    #     - j.txt (file, size=2)
+    #   - j.txt (file, size=3)
+
+    tree = day7.Tree(test_input)
+    # direct parents
+    assert tree.parent_map == {
+        '/': None,
+        'j.txt': '/',
+        'a': '/',
+        'd': 'a',
+        'j.txt_1': 'd',
+        'd_1': '/',
+        'j.txt_2': 'd_1'
+    }
+
+    assert tree.dir_sizes() == {
+        "/": 6,
+        "a": 1,
+        "d": 1,
+        "d_1": 2
+    }
+
+
+def test_smallest_dir_size_to_delete():
+    test_input = day7.terminal_lines("day7_test.txt")
+    tree = day7.Tree(test_input)
+    assert day7.smallest_dir_to_delete(tree) == 24933642 
