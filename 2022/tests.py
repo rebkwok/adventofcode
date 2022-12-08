@@ -12,6 +12,7 @@ import day4
 import day5
 import day6
 import day7
+import day8
 
 
 # day 1
@@ -512,3 +513,19 @@ def test_smallest_dir_size_to_delete():
     test_input = day7.terminal_lines("day7_test.txt")
     tree = day7.Tree(test_input)
     assert day7.smallest_dir_to_delete(tree) == 24933642 
+
+
+# day8
+def test_number_visible():
+    heightmap = day8.heightmap("day8_test.txt")
+    assert day8.number_visible(heightmap) == 21
+
+
+def test_scenic_score():
+    heightmap = day8.heightmap("day8_test.txt")
+    # assert day8.scenic_score(heightmap, 1, 2) == 4
+    assert day8.scenic_score(heightmap, 3, 2) == 8
+
+def test_highest_scenic_score():
+    heightmap = day8.heightmap("day8_test.txt")
+    assert day8.highest_scenic_score(heightmap) == 8
