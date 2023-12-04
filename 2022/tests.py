@@ -13,6 +13,9 @@ import day5
 import day6
 import day7
 import day8
+import day9
+import day10
+import day11
 
 
 # day 1
@@ -529,3 +532,26 @@ def test_scenic_score():
 def test_highest_scenic_score():
     heightmap = day8.heightmap("day8_test.txt")
     assert day8.highest_scenic_score(heightmap) == 8
+
+# day 9
+def test_go():
+    moves = day9.moves("day9_test.txt")
+    sim = day9.Simulate(moves, 2)
+    sim.go()
+    assert len(sim.visited) == 13
+
+
+# day 10
+def test_run():
+    assert day10.run("day10_test.txt") == 13140
+
+
+# day 12
+def test_find_path():
+    input = [
+        ['S', 'a', 'b', 'q', 'p', 'o', 'n', 'm'], 
+        ['a', 'b', 'c', 'r', 'y', 'x', 'x', 'l'], 
+        ['a', 'c', 'c', 's', 'z', 'E', 'x', 'k'], 
+        ['a', 'c', 'c', 't', 'u', 'v', 'w', 'j'], 
+        ['a', 'b', 'd', 'e', 'f', 'g', 'h', 'i']
+    ]
